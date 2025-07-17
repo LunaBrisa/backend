@@ -184,14 +184,21 @@ export default class GamesController {
     await game.merge({ status: 'cancelled' }).save()
     return { message: 'Juego cancelado', game }
   }
-
   async abandon({ params, auth, response }: HttpContext) {
     const game = await Game.findOrFail(params.id)
+
     if (game.status !== 'active') {
       return response.badRequest({ error: 'El juego no está activo' })
     }
+
     const winner = game.player_1 === auth.user!.id ? game.player_2 : game.player_1
-    await game.merge({ status: 'finished', winner }).save()
-    return { message: 'Juego abandonado', game }
-  }
+
+    game.merge({ status: 'finished', winner })
+    await game.save()
+
+    await game.load('player1')
+    await game.load('player2')
+
+    return { message: 'Juego abandonado',game}
+    }
 }
