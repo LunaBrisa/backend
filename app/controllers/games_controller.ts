@@ -192,14 +192,7 @@ export default class GamesController {
     }
 
     const winner = game.player_1 === auth.user!.id ? game.player_2 : game.player_1
-
-    game.merge({ status: 'finished', winner })
-    await game.save()
-
-    await game.load('player1')
-    await game.load('player2')
-
+    await game.merge({ status: 'finished', winner }).save()
     return { message: 'Juego abandonado', game }
   }
-
 }
